@@ -1,43 +1,44 @@
-from flask import Flask, jsonify,request
-from translation import trans
+from pypt import trans
+from sanic import Sanic
+from sanic.response import json
 
-app = Flask(__name__)
+app = Sanic("DeepL API")
 
-@app.route('/v2/translate', methods=['POST'])
-def post():
-    try:
-        text = request.form.get('text')
-        print(f">> Sending requests: {text}")
+@app.route('/v2/translate', methods=["GET"])
+async def get_translate(request, lang_tgt='EN', lang_src='ZH'):
+    if request.args.get('lang_tgt'):
+        lang_tgt = request.args.get('lang_tgt')
+    if request.args.get('lang_src'):
+        lang_src = request.args.get('lang_src')
+    if request.args.get('text'):
+        text_to_translate = request.args.get('text')
+        print(f'>> Request: {text_to_translate}')
+        result = await trans(text_to_translate, lang_tgt=lang_tgt, lang_src=lang_src)
+        print(f'<< Response: {result}')
+    else:
+        result = "未找到需要翻译的词句 Text to translate not found"
+        print(">> Request error: Text not found")
+    return json(text_to_dict(result, lang_src))
 
-        MAX_LENGTH = 5000
-        if len(text) <= MAX_LENGTH:
-            result = trans(text.encode("utf-8"))
-        else:
-            text_list = [
-                text[i:i + MAX_LENGTH] for i in range(0, len(text), MAX_LENGTH)
-            ]
-            result = [trans_list_item(text) for text in text_list]
-            result = " ".join(result)
-        print(f"<< Succeed: {result[:50]}...")
-        json = {
-            "translations": [{
-                "detected_source_language": "EN",
-                "text": f"{result}"
-            }]
-        }
-        result = jsonify(json)
-        return result
-    except Exception as e:
-        print(e)
-        return f"Error: {e}"
+@app.route('/v2/translate', methods=["POST"])
+async def post_translate(request, lang_tgt='EN', lang_src='ZH'):
+    if request.form.get('lang_tgt'):
+        lang_tgt = request.form.get('lang_tgt')
+    if request.form.get('lang_src'):
+        lang_src = request.form.get('lang_src')
+    if request.body:
+        text_to_translate = request.form.get('text')
+        print(f'>> Request: {text_to_translate}')
+        result = await trans(text_to_translate, lang_tgt=lang_tgt, lang_src=lang_src)
+        print(f'<< Response: {result}')
+    else:
+        result = "未找到需要翻译的词句 Text to translate not found"
+        print(">> Request error: Text not found")
+    return json(text_to_dict(result, lang_src))
+
+def text_to_dict(string, lang_src):
+    dct = {"translations":[{  "detected_source_language": lang_src,"text": string}]}
+    return dct
 
 
-def trans_list_item(text):
-    print(f"  -> Handling: {text[:50]}...")
-    result = trans(text.encode("utf-8"))
-    print(f"  <- Succeed: {result[:50]}...")
-    return result
-
-
-if __name__ == '__main__':
-    app.run(port=1337, debug=False)
+app.run(host="0.0.0.0", port=1337)

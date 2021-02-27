@@ -9,7 +9,7 @@ PARMS = {"headless": True,
             '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36',  # UA
             '--no-sandbox',  # 关闭沙盒模式
             '--start-maximized',  # 窗口最大化模式
-            '--proxy-server=127.0.0.1:1080'
+            # '--proxy-server=127.0.0.1:1080'
             # '--window-size=1920,1080',  # 窗口大小
             # '--proxy-server=http://localhost:1080'  # 代理
             # '--enable-automation'
@@ -37,7 +37,7 @@ async def trans(text: str,
           detect: bool = False) -> tuple:
     time_start = time.time()
     global BROWSER
-    BROWSER = await launch(args=PARMS['args'], handleSIGINT=False, handleSIGTERM=False, handleSIGHUP=False)# 
+    BROWSER = await launch(args=PARMS['args'], handleSIGINT=False, handleSIGTERM=False, handleSIGHUP=False)
     page = await BROWSER.newPage()
     await page.evaluateOnNewDocument(JS_TEXT)  # 本页刷新后值不变，自动执行js
     await page.goto(f'https://www.deepl.com/en/translator#{lang_src.upper()}/{lang_tgt.upper()}/{text}')
@@ -59,5 +59,10 @@ async def trans(text: str,
 def trans_auto(text):
     return trans(text, 'zh')
 
-
-# asyncio.get_event_loop().run_until_complete(trans(text))
+if __name__ == '__main__':
+    text = '测试'
+    try:
+        print('Start running...')
+        asyncio.get_event_loop().run_until_complete(trans(text))
+    except KeyboardInterrupt as k:
+        print('\nKey pressed to interrupt...')

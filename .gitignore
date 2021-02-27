@@ -1,5 +1,8 @@
+.idea/
+.vscode/
 driver/chromedriver
 test
+old
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
