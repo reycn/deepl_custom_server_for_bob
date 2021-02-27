@@ -7,7 +7,9 @@ PARMS = {"headless": True,
             '--disable-infobars',  # 关闭自动化提示框
             '--log-level=30',  # 日志保存等级， 建议设置越好越好，要不然生成的日志占用的空间会很大 30为warning级别
             '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36',  # UA
-            '--no-sandbox',  # 关闭沙盒模式
+            '--single-process',
+	    '--disable-gpu',
+	    '--no-sandbox',  # 关闭沙盒模式
             '--start-maximized',  # 窗口最大化模式
             # '--proxy-server=127.0.0.1:1080'
             # '--window-size=1920,1080',  # 窗口大小
@@ -25,7 +27,7 @@ JS_TEXT = """
     }
     """
 
-SELECTOR = "#dl_translator > div.lmt__text > div.lmt__sides_container > div.lmt__side_container.lmt__side_container--target > div.lmt__textarea_container.halfViewHeight > div.lmt__translations_as_text > p.lmt__translations_as_text__item.lmt__translations_as_text__main_translation > button.lmt__translations_as_text__text_btn"
+SELECTOR = "button.lmt__translations_as_text__text_btn"
 
 BROWSER = None
 
@@ -46,7 +48,7 @@ async def trans(text: str,
     #     'document.querySelector("#dl_translator > div.lmt__text > div.lmt__sides_container > div.lmt__side_container.lmt__side_container--target > div.lmt__textarea_container.halfViewHeight > div.lmt__translations_as_text > p.lmt__translations_as_text__item.lmt__translations_as_text__main_translation > button.lmt__translations_as_text__text_btn").innerText.length > 0'
     #     );
     await page.waitForFunction(
-        'document.querySelector("#target-dummydiv").textContent.length >0'
+        'document.querySelector("button.lmt__translations_as_text__text_btn").textContent.length >0'
         );
     element = await page.querySelector(SELECTOR)
     result = await page.evaluate('(element) => element.textContent', element)
